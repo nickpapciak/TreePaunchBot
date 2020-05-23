@@ -1,5 +1,4 @@
 import os
-
 from discord.ext import commands, tasks
 import discord
 
@@ -8,11 +7,12 @@ CLIENT_ID = os.environ.get("CLIENT_ID")  # hey dont steal my client secret
 CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
 
 
-class Observer(commands.Cog):
+class StreamObserver(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.active_streamers = set()
-        self.search_for_streams.start()
+        self.search_for_streams.start() 
+
 
     def cog_unload(self):
         self.search_for_streams.cancel()
@@ -71,9 +71,28 @@ class Observer(commands.Cog):
                         self.active_streamers.add(member)  # this is kinda janky might use json later
 
         # goes through the set and sees if anyone has stopped streaming
-        [self.active_streamers.discard(member) for member in self.active_streamers if not
+        [self.active_streamers.discard(member) for member in frozenset(self.active_streamers) if not
             self.check_stream_continued(member)]
 
+    @search_for_streams.before_loop
+    async def before(self):
+        await self.bot.wait_until_ready()
+
+    @commands.command(name='drop')
+    @commands.is_owner()
+    async def drop_streamer_cache(self, ctx):
+        self.active_streamers.clear()
+        await ctx.send('Dropped streamer cache')
+
+    @commands.command(name='selfpurge')
+    @commands.is_owner()
+    async def purge_own(self, ctx, ids: commands.Greedy[int] = None):
+        if ids is None:
+            [await m.delete() async for m in ctx.channel.history(limit=5) if m.author == ctx.me]
+            return
+        msgs = [await ctx.channel.fetch_message(i) for i in ids]
+        await ctx.channel.delete_messages(msgs)       
 
 def setup(bot):
-    bot.add_cog(Observer(bot))
+    bot.add_cog(StreamObserver(bot))
+
