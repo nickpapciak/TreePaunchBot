@@ -1,11 +1,20 @@
 import os
+from contextlib import suppress
 from discord.ext import commands, tasks
 import discord
+import secrets
 
 # Define constants
 CLIENT_ID = os.environ.get("CLIENT_ID")  # hey dont steal my client secret
 CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
 
+STREAMER_DICT = {
+  'TTV_Darklinggammer': 448865942634496020,
+  'PandaSmoke': 161526961439637504,
+  'SorlynLive': 176847780671782922,
+  'T_Sori': 140659753616408576,
+  'zeelinuxguy': 356948290169864204,
+}
 
 class StreamObserver(commands.Cog):
     def __init__(self, bot):
@@ -17,62 +26,90 @@ class StreamObserver(commands.Cog):
     def cog_unload(self):
         self.search_for_streams.cancel()
 
-    async def get_profile_image(self, twitchname):
-        """Yes, all this does is get the profile image of the twith user.
-        Yes, you could just take the discord user's image. Yes you could just
-        send the link and have the automatic embed, but here in narfville
-        we don't cut corners, exept we do but I just wanted it to look nice
-        in the embed so here we are ok this docstring is too long bye"""
+    async def get_stream_embed(self, streamer): 
+        '''Gets information about a streamer and returns it in the form of an embed if possible 
 
-        # gets access token or something idk I should prob learn requests and aiohttp more
+        Args: 
+            streamer (str): the login name of the current streamer
+        
+        Returns: 
+            (discord.Embed): An embed with information about a stream
+
+        Raises: 
+            False (bool): Returns false if streamer is not streaming
+        '''
+      
+
+        # I'm not super familiar with aiohttp so don't crucify me if this is a terrible way of doing it :/
+
+        
+        #gets authorization to the twitch api
         async with self.bot.session.post(
                 f"https://id.twitch.tv/oauth2/token?client_id={CLIENT_ID}&client_secret={CLIENT_SECRET}&grant_type"
                 f"=client_credentials") as post:
             token = (await post.json()).get('access_token')
-
-        # requests image url from twitch api
-        async with self.bot.session.get(f'https://api.twitch.tv/helix/users/?login={twitchname}',
+  
+        # requests data about the streamer
+        async with self.bot.session.get(f'https://api.twitch.tv/helix/streams/?user_login={streamer}',
                                         headers={'Client-ID': CLIENT_ID, 'Authorization': f'Bearer {token}'}) as resp:
             response = await resp.json()
-            return response['data'][0].get('profile_image_url')
+            if not response['data']: # returns False is streamer is offline
+              return False 
+            data = response['data'][0]
 
-    @staticmethod
-    def check_stream_continued(member):
-        return any([isinstance(a, discord.Streaming) for a in member.activities])
+            # gets the url of the thumbnail
+            thumbnail_url = data['thumbnail_url'].format(width=1920, height=1080) + f"?{secrets.token_urlsafe(5)}" # <-- thats what streamcord does I wasn't able to figure it out myself 
+            twitch_name = data['user_name'] 
+            viewer_count = data['viewer_count']
+            stream_name = data['title']
+            view_word = "viewers" if viewer_count != 1 else "viewer"
+            
+        # this is used to find the name of the game from the id
+        async with self.bot.session.get(f'https://api.twitch.tv/helix/games/?id={data["game_id"]}',
+                                        headers={'Client-ID': CLIENT_ID, 'Authorization': f'Bearer {token}'}) as resp:
+            response = await resp.json()
+            game = response['data'][0]['name']
 
+        # this gets the streamer's pfp
+        async with self.bot.session.get(f'https://api.twitch.tv/helix/users/?login={streamer}',
+                                        headers={'Client-ID': CLIENT_ID, 'Authorization': f'Bearer {token}'}) as resp:
+            response = await resp.json()
+            streamer_pfp = response['data'][0].get('profile_image_url')
+        
+        # creates the embed
+        embed = discord.Embed(
+          title = stream_name,
+          url = f'https://twitch.tv/{streamer}',
+          description = f"Playing: {game}\n{viewer_count:,} {view_word}", 
+          colour = 0x2ee863,
+        )
+        embed.set_image(url=thumbnail_url)
+        embed.set_author(name = f"{twitch_name} is now live! Come show your support!", icon_url = streamer_pfp)
+
+        return embed
+
+      
     @tasks.loop(seconds=10.0)
     async def search_for_streams(self):
 
-        # two treepaunch channels
-        channel = self.bot.get_channel(708832516177395833)
-        guild = self.bot.get_guild(618791723572658176)
+      
+        channel = self.bot.get_channel(720473926983221340)# tp --> 708832516177395833
+        guild = self.bot.get_guild(618791723572658176) # tp --> 618791723572658176
+        streaming_role = guild.get_role(720473746288410644) #tp --> 720473746288410644
 
-        humans = [member for member in guild.members if not member.bot]
 
-        # checks all the users in ths server for streaming statuses
-        for member in humans:
-            for activity in member.activities:
-                if isinstance(activity, discord.Streaming):
+        for streamer in STREAMER_DICT.keys(): # goes through the dict of streamers
+          stream_embed = await StreamObserver.get_stream_embed(self, streamer) #generates the embed
+          if streamer not in self.active_streamers: # if the streamer is not already in the set 
+            if stream_embed: # if they are streaming
+              await channel.send(embed = stream_embed)
+              self.active_streamers.add(streamer)
+              await guild.get_member(STREAMER_DICT[streamer]).add_roles(streaming_role) # gives roles
+          else: # if they are already in the set 
+            if not stream_embed: # if they are no longer streaming
+              self.active_streamers.discard(streamer)
+              await guild.get_member(STREAMER_DICT[streamer]).remove_roles(streaming_role) #removes roles
 
-                    if member not in self.active_streamers:
-                        # this is necessary to get the twitch name
-                        twitch_name = activity.assets['large_image'][7:]
-
-                        # this is just the embed it makes it look nice, say hi to embed everyone
-                        embed = discord.Embed(
-                            title=f"{twitch_name} is streaming {activity.game} on {activity.platform}. Come say hi!",
-                            description=f"{activity.url}"
-                        )
-
-                        # I made it a function to hide the pain of the code above and also so it doesn't look trash
-                        image_url = await self.get_profile_image(twitch_name)
-                        embed.set_image(url=image_url)
-                        await channel.send(embed=embed)
-                        self.active_streamers.add(member)  # this is kinda janky might use json later
-
-        # goes through the set and sees if anyone has stopped streaming
-        [self.active_streamers.discard(member) for member in frozenset(self.active_streamers) if not
-            self.check_stream_continued(member)]
 
     @search_for_streams.before_loop
     async def before(self):
@@ -84,14 +121,30 @@ class StreamObserver(commands.Cog):
         self.active_streamers.clear()
         await ctx.send('Dropped streamer cache')
 
+    @commands.command(name='show')
+    @commands.is_owner()
+    async def show_streamer_cache(self, ctx):
+        await ctx.send(str(self.active_streamers))
+
+
+    @commands.command()
+    @commands.is_owner()
+    async def manage_roles(self, ctx):
+        await ctx.send(f'```{ctx.guild.roles}```')
+        guild = self.bot.get_guild(618791723572658176)
+        member = guild.get_member(258013196592349184)
+        role = guild.get_role(720473746288410644)
+        await member.add_roles(role)
+
     @commands.command(name='selfpurge')
     @commands.is_owner()
     async def purge_own(self, ctx, ids: commands.Greedy[int] = None):
         if ids is None:
             [await m.delete() async for m in ctx.channel.history(limit=5) if m.author == ctx.me]
             return
-        msgs = [await ctx.channel.fetch_message(i) for i in ids]
-        await ctx.channel.delete_messages(msgs)       
+        with suppress(Exception):
+            for i in ids:
+                await (await ctx.channel.fetch_message(i)).delete()   
 
 def setup(bot):
     bot.add_cog(StreamObserver(bot))

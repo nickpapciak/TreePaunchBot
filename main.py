@@ -1,9 +1,3 @@
-# you can ignore most of these comments nick helped make it less braindead
-# but im keeping them because I like reading my tired comments
-
-# I should pep8 this but its too far gone 
-# thank god most of you don't understand this, this entire code is pretty braindead but 
-# it works sooooo....
 import os
 import logging
 
@@ -24,9 +18,10 @@ class TreePaunchBot(commands.Bot):
         self.load_extension('streamobserver')
         print("TreePaunchBot started")
 
-    async def on_command_error(self, ctx, error):
-        print(error)
-        return True
+
+    # async def on_command_error(self, ctx, error):
+    #     print(error)
+    #     return True
 
 keep_alive()
 TOKEN = os.environ.get("DISCORD_TOKEN")
