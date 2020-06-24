@@ -13,8 +13,9 @@ STREAMER_DICT = {
   'PandaSmoke': 161526961439637504,
   'SorlynLive': 176847780671782922,
   'T_Sori': 140659753616408576,
-  'zeelinuxguy': 356948290169864204,
+  'narfeepap' : 258013196592349184
 }
+
 
 class StreamObserver(commands.Cog):
     def __init__(self, bot):
@@ -26,6 +27,7 @@ class StreamObserver(commands.Cog):
     def cog_unload(self):
         self.search_for_streams.cancel()
 
+  
     async def get_stream_embed(self, streamer): 
         '''Gets information about a streamer and returns it in the form of an embed if possible 
 
@@ -42,7 +44,7 @@ class StreamObserver(commands.Cog):
 
         # I'm not super familiar with aiohttp so don't crucify me if this is a terrible way of doing it :/
 
-        
+
         #gets authorization to the twitch api
         async with self.bot.session.post(
                 f"https://id.twitch.tv/oauth2/token?client_id={CLIENT_ID}&client_secret={CLIENT_SECRET}&grant_type"
@@ -53,8 +55,12 @@ class StreamObserver(commands.Cog):
         async with self.bot.session.get(f'https://api.twitch.tv/helix/streams/?user_login={streamer}',
                                         headers={'Client-ID': CLIENT_ID, 'Authorization': f'Bearer {token}'}) as resp:
             response = await resp.json()
-            if not response['data']: # returns False is streamer is offline
-              return False 
+            try:
+              if not response['data']: # returns False is streamer is offline
+                return False 
+            except: 
+              return False
+              print(response)
             data = response['data'][0]
 
             # gets the url of the thumbnail
@@ -93,7 +99,7 @@ class StreamObserver(commands.Cog):
     async def search_for_streams(self):
 
       
-        channel = self.bot.get_channel(720473926983221340)# tp --> 708832516177395833
+        channel = self.bot.get_channel(708832516177395833)# tp --> 708832516177395833
         guild = self.bot.get_guild(618791723572658176) # tp --> 618791723572658176
         streaming_role = guild.get_role(720473746288410644) #tp --> 720473746288410644
 
@@ -103,12 +109,20 @@ class StreamObserver(commands.Cog):
           if streamer not in self.active_streamers: # if the streamer is not already in the set 
             if stream_embed: # if they are streaming
               await channel.send(embed = stream_embed)
-              self.active_streamers.add(streamer)
+              self.active_streamers.add(streamer) # adds the streamer to the set 
               await guild.get_member(STREAMER_DICT[streamer]).add_roles(streaming_role) # gives roles
           else: # if they are already in the set 
             if not stream_embed: # if they are no longer streaming
               self.active_streamers.discard(streamer)
               await guild.get_member(STREAMER_DICT[streamer]).remove_roles(streaming_role) #removes roles
+        
+        # second check so if the bot goes offline then it removes streamer role
+        for streamer in STREAMER_DICT.keys(): 
+          if streamer not in self.active_streamers: 
+            try: 
+              await guild.get_member(STREAMER_DICT[streamer]).remove_roles(streaming_role)
+            except: 
+              pass
 
 
     @search_for_streams.before_loop
@@ -145,6 +159,31 @@ class StreamObserver(commands.Cog):
         with suppress(Exception):
             for i in ids:
                 await (await ctx.channel.fetch_message(i)).delete()   
+    @commands.command()
+    async def f(self, ctx):
+          """Press it to pay respects"""
+          player_message = ctx.message
+          await ctx.message.delete()
+
+          embed = discord.Embed(
+              description="""⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+      ⠀⠀⠀⢀⡤⢶⣶⣶⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+      ⠀⠀⢀⣠⣤⣤⣤⣿⣧⣀⣀⣀⣀⣀⣀⣀⣀⣤⡄⠀
+      ⢠⣾⡟⠋⠁⠀⠀⣸⠇⠈⣿⣿⡟⠉⠉⠉⠙⠻⣿⡀
+      ⢺⣿⡀⠀⠀⢀⡴⠋⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠙⠇
+      ⠈⠛⠿⠶⠚⠋⣀⣤⣤⣤⣿⣿⣇⣀⣀⣴⡆⠀⠀⠀
+      ⠀⠀⠀⠀⠠⡞⠋⠀⠀⠀⣿⣿⡏⠉⠛⠻⣿⡀⠀⠀
+      ⠀⠀⠀⠀⠀⠀⠀⠀ ⠀⠀⣿⣿⡇⠀⠀⠀⠈⠁⠀⠀
+      ⠀⠀⣠⣶⣶⣶⣶⡄⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀
+      ⠀⢰⣿⠟⠉⠙⢿⡟⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀
+      ⠀⢸⡟⠀⠀⠀⠘⠀⠀⠀⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀
+      ⠀⠈⢿⡄⠀⠀⠀⠀⠀⣼⣿⠏⠀⠀⠀⠀⠀⠀⠀⠀
+      ⠀⠀⠀⠙⠷⠶⠶⠶⠿⠟⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+      
+                      """,
+              colour=0x2ee863)
+          embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
+          await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(StreamObserver(bot))
