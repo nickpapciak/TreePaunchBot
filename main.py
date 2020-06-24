@@ -13,6 +13,7 @@ logging.basicConfig(level=logging.INFO)
 class TreePaunchBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix='~')
+        self.logger = logging.getLogger(__name__)
         self.owner_ids = [680835476034551925, 258013196592349184]
         self.session = aiohttp.ClientSession()
         self.load_extension('streamobserver')
