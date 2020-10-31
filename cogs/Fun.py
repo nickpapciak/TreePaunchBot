@@ -5,7 +5,7 @@ import aiohttp
 
 
 
-class fun(commands.Cog):
+class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         
@@ -58,7 +58,7 @@ class fun(commands.Cog):
             await error_message.delete()
 
 def setup(bot):
-    bot.add_cog(fun(bot))
+    bot.add_cog(Fun(bot))
 
 
 

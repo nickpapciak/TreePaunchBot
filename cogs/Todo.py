@@ -1,9 +1,15 @@
 import discord
 from discord.ext import commands, menus
 from discord.ext.commands import has_permissions, CheckFailure, CommandNotFound
-import json
-from OtherFiles.todo_util import todo_add, todo_view, todo_delete
+
 from datetime import datetime
+import json
+
+from OtherFiles.todo_util import todo_add, todo_view, todo_delete
+from main import TreePaunchBot
+
+
+FILEPATH = "Data/todos.json"
 
 # creates a source class for the menus module
 class MySource(menus.ListPageSource):
@@ -14,14 +20,14 @@ class MySource(menus.ListPageSource):
         offset = (menu.current_page * self.per_page) + 1
         # sends the correct page 
         embed_text = '\n'.join(f'{index}. {item}' for index, item in enumerate(entries, start=offset))
-        return discord.Embed(description = embed_text, colour =  self.bot.color)
+        return discord.Embed(description = embed_text, colour =  TreePaunchBot.color)
 
-class todo(commands.Cog):
+class Todo(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     async def todo_logger(self): 
-      with open("OtherFiles/todos.json" , "r") as f: 
+      with open(FILEPATH , "r") as f: 
         dict = json.load(f)
 
         url_key = await self.bot.session.post("https://mystb.in/documents", data = json.dumps(dict, indent=6))
@@ -39,7 +45,7 @@ class todo(commands.Cog):
         """TODO command that allows a user to store tasks"""
 
 
-    @todo.command(aliases = ["add", "create", "start"])
+    @todo.command(name = "add", aliases = ["create", "start"])
     async def todo_add_cmd(self, ctx, *, todo=None): 
       if todo is None: 
         added_todo = "No todo was specified."
@@ -51,7 +57,7 @@ class todo(commands.Cog):
       await ctx.send(embed=todo_embed)
       await self.todo_logger()
 
-    @todo.command(aliases = ["view", "see", "check", "list"])
+    @todo.command(name = "view", aliases = ["see", "check", "list"])
     async def todo_view_cmd(self, ctx): 
       todo_list = todo_view(str(ctx.author.id)) # generates a list of todo's
 
@@ -65,7 +71,7 @@ class todo(commands.Cog):
         await pages.start(ctx)
         await self.todo_logger()
 
-    @todo.command(aliases = ["delete", "del", "remove", "end", "finish"])
+    @todo.command(name = "delete", aliases = ["del", "remove", "end", "finish"])
     async def todo_delete_cmd(self, ctx, index=None): 
       if index is None: 
         deleted_todo = "No index specified."
@@ -78,7 +84,7 @@ class todo(commands.Cog):
       await self.todo_logger()
 
 def setup(bot):
-    bot.add_cog(todo(bot))
+    bot.add_cog(Todo(bot))
 
 
 

@@ -3,7 +3,7 @@ from discord.ext import commands, tasks
 from discord.ext.commands import has_permissions, CheckFailure, CommandNotFound
 import asyncio
 
-class listeners(commands.Cog):
+class Listeners(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -29,7 +29,7 @@ class listeners(commands.Cog):
           await message.channel.send('https://tenor.com/view/grevious-general-kenobi-star-wars-gif-11406339')
 
 def setup(bot):
-    bot.add_cog(listeners(bot))
+    bot.add_cog(Listeners(bot))
 
 
 

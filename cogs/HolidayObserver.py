@@ -4,10 +4,27 @@ import discord
 import datetime
 import json 
 
-def generate_readable_day(day:str): 
-  MONTH_DICT={1:'January', 2:'February', 3:'March', 4:'April', 5:'May', 6:'June', 7:'July', 8:'August', 9:'September', 10:'October', 11:'November', 12:'December'}
-  DAY_SUFFIX = {1:"st", 2:"nd", 3:"rd"}
+# define constants 
+FILEPATH = "Data/holidays.json"
+MONTH_DICT= {
+   1:"January",
+   2:"February",
+   3:"March",
+   4:"April",
+   5:"May",
+   6:"June",
+   7:"July",
+   8:"August",
+   9:"September",
+   10:"October",
+   11:"November",
+   12:"December"
+}
+DAY_SUFFIX = {1:"st", 2:"nd", 3:"rd"}
+with open(FILEPATH, "r+") as holiday_file: 
+  EVENTS = json.load(holiday_file)
 
+def generate_readable_day(day:str): 
   month = MONTH_DICT[int(day[:2])]
   numbered_date = int(day[3:])
   if numbered_date in [1, 2, 3, 21, 22, 23, 31]: 
@@ -20,10 +37,6 @@ def refresh_json(file, dict):
     file.seek(0)
     file.truncate()
     json.dump(dict, file, indent=2)
-
-with open("OtherFiles/holidays.json", "r+") as holiday_file: 
-  EVENTS = json.load(holiday_file)
-
 
 
 class HolidayObserver(commands.Cog):
@@ -42,7 +55,7 @@ class HolidayObserver(commands.Cog):
     
     for day in EVENTS.keys(): 
       if day == today: 
-        with open("OtherFiles/holidays.json", "r+") as holiday_file: 
+        with open(FILEPATH, "r+") as holiday_file: 
           holiday_dict = json.load(holiday_file)
 
           if not holiday_dict[day]["has_triggered"]:
@@ -56,7 +69,7 @@ class HolidayObserver(commands.Cog):
             refresh_json(holiday_file, holiday_dict)
 
     if today == "12-31": 
-      with open("OtherFiles/holidays.json", "r+") as holiday_file: 
+      with open(FILEPATH, "r+") as holiday_file: 
           holiday_dict = json.load(holiday_file)
           for key in holiday_dict.keys(): 
             holiday_dict[key]["has_triggered"] = False
@@ -65,7 +78,7 @@ class HolidayObserver(commands.Cog):
 
   @commands.command(aliases = ["next", "upcoming", "events"])
   async def _next(self, ctx): 
-    with open("OtherFiles/holidays.json", "r") as holiday_file: 
+    with open(FILEPATH, "r") as holiday_file: 
         holiday_dict = json.load(holiday_file)
 
         for day, date_status in holiday_dict.items():

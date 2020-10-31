@@ -1,7 +1,8 @@
 import json
+FILEPATH = "Data/todos.json"
 
 def todo_add(user, todo_text): 
-    with open("OtherFiles/todos.json" , "r+") as f: 
+    with open(FILEPATH , "r+") as f: 
         todo_dict = json.load(f) # loads the todo's as a dict
     
         if user in todo_dict.keys():  # goes through each user 
@@ -16,7 +17,7 @@ def todo_add(user, todo_text):
         return f"Added **{todo_text}** to your todo list!"
 
 def todo_view(user): 
-    with open("OtherFiles/todos.json" , "r") as f: 
+    with open(FILEPATH , "r") as f: 
         todo_dict = json.load(f) # loads the file into a dict
 
 
@@ -26,7 +27,7 @@ def todo_view(user):
     return [] # returns empty list only if the user doesn't exist/doesn't have todo's
 
 def todo_delete(user, index): 
-    with open("OtherFiles/todos.json" , "r+") as f: 
+    with open(FILEPATH , "r+") as f: 
         todo_dict = json.load(f) # loads the file into a dict
         
         # catches type errors 
