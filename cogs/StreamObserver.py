@@ -3,19 +3,24 @@ from contextlib import suppress
 from discord.ext import commands, tasks
 import discord
 import secrets
+import datetime
+import json 
 
 # Define constants
 CLIENT_ID = os.environ.get("CLIENT_ID")  # hey dont steal my client secret
 CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
 
 STREAMER_DICT = {
-  'TTV_Darklinggammer': 448865942634496020,
-  'PandaSmoke': 161526961439637504,
+  'darklinggammer123': 448865942634496020,
+  'asleepypandaplays': 161526961439637504,
   'SorlynLive': 176847780671782922,
   'T_Sori': 140659753616408576,
-  'narfeepap' : 258013196592349184
+  'narfeepap' : 258013196592349184, 
+  'xwassinatorx' : 309050639344730122, 
+  'dragons_layer_gaming' : 521223617967685632, 
+  'AsceUh' : 669404578936258586,
+  'emperorbliss' : 387398916443865108,
 }
-
 
 class StreamObserver(commands.Cog):
     def __init__(self, bot):
@@ -87,7 +92,7 @@ class StreamObserver(commands.Cog):
           title = stream_name,
           url = f'https://twitch.tv/{streamer}',
           description = f"Playing: {game}\n{viewer_count:,} {view_word}", 
-          colour = 0x2ee863,
+          colour = self.bot.color,
         )
         embed.set_image(url=thumbnail_url)
         embed.set_author(name = f"{twitch_name} is now live! Come show your support!", icon_url = streamer_pfp)
@@ -111,10 +116,14 @@ class StreamObserver(commands.Cog):
               await channel.send(embed = stream_embed)
               self.active_streamers.add(streamer) # adds the streamer to the set 
               await guild.get_member(STREAMER_DICT[streamer]).add_roles(streaming_role) # gives roles
+
           else: # if they are already in the set 
             if not stream_embed: # if they are no longer streaming
               self.active_streamers.discard(streamer)
-              await guild.get_member(STREAMER_DICT[streamer]).remove_roles(streaming_role) #removes roles
+              await guild.get_member(STREAMER_DICT[streamer]).remove_roles(streaming_role)
+              print("REMOVED THE ROLE") 
+              #removes roles
+          
         
         # second check so if the bot goes offline then it removes streamer role
         for streamer in STREAMER_DICT.keys(): 
@@ -124,10 +133,10 @@ class StreamObserver(commands.Cog):
             except: 
               pass
 
-
     @search_for_streams.before_loop
-    async def before(self):
+    async def stream_before(self):
         await self.bot.wait_until_ready()
+
 
     @commands.command(name='drop')
     @commands.is_owner()
@@ -141,50 +150,7 @@ class StreamObserver(commands.Cog):
         await ctx.send(str(self.active_streamers))
 
 
-    @commands.command()
-    @commands.is_owner()
-    async def manage_roles(self, ctx):
-        await ctx.send(f'```{ctx.guild.roles}```')
-        guild = self.bot.get_guild(618791723572658176)
-        member = guild.get_member(258013196592349184)
-        role = guild.get_role(720473746288410644)
-        await member.add_roles(role)
-
-    @commands.command(name='selfpurge')
-    @commands.is_owner()
-    async def purge_own(self, ctx, ids: commands.Greedy[int] = None):
-        if ids is None:
-            [await m.delete() async for m in ctx.channel.history(limit=5) if m.author == ctx.me]
-            return
-        with suppress(Exception):
-            for i in ids:
-                await (await ctx.channel.fetch_message(i)).delete()   
-    @commands.command()
-    async def f(self, ctx):
-          """Press it to pay respects"""
-          player_message = ctx.message
-          await ctx.message.delete()
-
-          embed = discord.Embed(
-              description="""⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-      ⠀⠀⠀⢀⡤⢶⣶⣶⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-      ⠀⠀⢀⣠⣤⣤⣤⣿⣧⣀⣀⣀⣀⣀⣀⣀⣀⣤⡄⠀
-      ⢠⣾⡟⠋⠁⠀⠀⣸⠇⠈⣿⣿⡟⠉⠉⠉⠙⠻⣿⡀
-      ⢺⣿⡀⠀⠀⢀⡴⠋⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠙⠇
-      ⠈⠛⠿⠶⠚⠋⣀⣤⣤⣤⣿⣿⣇⣀⣀⣴⡆⠀⠀⠀
-      ⠀⠀⠀⠀⠠⡞⠋⠀⠀⠀⣿⣿⡏⠉⠛⠻⣿⡀⠀⠀
-      ⠀⠀⠀⠀⠀⠀⠀⠀ ⠀⠀⣿⣿⡇⠀⠀⠀⠈⠁⠀⠀
-      ⠀⠀⣠⣶⣶⣶⣶⡄⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀
-      ⠀⢰⣿⠟⠉⠙⢿⡟⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀
-      ⠀⢸⡟⠀⠀⠀⠘⠀⠀⠀⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀
-      ⠀⠈⢿⡄⠀⠀⠀⠀⠀⣼⣿⠏⠀⠀⠀⠀⠀⠀⠀⠀
-      ⠀⠀⠀⠙⠷⠶⠶⠶⠿⠟⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-      
-                      """,
-              colour=0x2ee863)
-          embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
-          await ctx.send(embed=embed)
-
+  
 def setup(bot):
     bot.add_cog(StreamObserver(bot))
 
