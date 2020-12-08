@@ -19,8 +19,8 @@ STREAMER_DICT = {
   'xwassinatorx' : 309050639344730122, 
   'dragons_layer_gaming' : 521223617967685632, 
   'AsceUh' : 669404578936258586,
-  'emperorbliss' : 387398916443865108,
 }
+# 'emperorbliss' : 387398916443865108,
 
 class StreamObserver(commands.Cog):
     def __init__(self, bot):

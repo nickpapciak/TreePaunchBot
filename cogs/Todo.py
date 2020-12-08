@@ -12,7 +12,7 @@ from main import TreePaunchBot
 FILEPATH = "Data/todos.json"
 
 # creates a source class for the menus module
-class MySource(menus.ListPageSource):
+class TodoMenuSource(menus.ListPageSource):
     def __init__(self, data):
         super().__init__(data, per_page=6)
 
@@ -40,7 +40,7 @@ class Todo(commands.Cog):
         colour =  self.bot.color)
       await channel.send(embed=todo_embed)
 
-    @commands.group(case_insensitive=True)
+    @commands.group(aliases = ['t'], case_insensitive=True)
     async def todo(self, ctx):
         """TODO command that allows a user to store tasks"""
 
@@ -67,7 +67,7 @@ class Todo(commands.Cog):
           colour =  self.bot.color)
         await ctx.send(embed=todo_embed)
       else: 
-        pages = menus.MenuPages(source=MySource(todo_list), clear_reactions_after=True) # creates a menu
+        pages = menus.MenuPages(source=TodoMenuSource(todo_list), clear_reactions_after=True) # creates a menu
         await pages.start(ctx)
         await self.todo_logger()
 

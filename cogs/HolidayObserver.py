@@ -50,7 +50,7 @@ class HolidayObserver(commands.Cog):
     """Checks for certain holidays"""
     channel = self.bot.get_channel(720473926983221340) #tp = 618791723572658179
     
-    # gets the date to print it at 3:00pm cst
+    # gets the date to print it at 2:00pm cst 
     today = str(datetime.datetime.now() - datetime.timedelta(hours=20))[5:10]
     
     for day in EVENTS.keys(): 

@@ -7,6 +7,10 @@
     "name": "Rhyknyt's Birthday",
     "has_triggered": true
   },
+  "02-08": {
+    "name": "StorySalt's Birthday",
+    "has_triggered": true
+  },
   "02-25": {
     "name": "Narfee's Birthday",
     "has_triggered": true
@@ -65,27 +69,31 @@
   },
   "10-31": {
     "name": "test day 2 but also spook day",
-    "has_triggered": false
+    "has_triggered": true
   },
   "11-01": {
     "name": "Test day 3",
-    "has_triggered": false
+    "has_triggered": true
   },
   "11-02": {
     "name": "Test day 4 but also birthday ",
-    "has_triggered": false
+    "has_triggered": true
   },
   "11-03": {
     "name": "test day 5 what?",
-    "has_triggered": false
+    "has_triggered": true
   },
   "11-04": {
     "name": "Test day 6 birthday",
-    "has_triggered": false
+    "has_triggered": true
   },
   "11-05": {
     "name": "BADABING BADABANG if it hasn't broken by now you should be good to go to make this permanant pog",
-    "has_triggered": false
+    "has_triggered": true
+  },
+  "11-08": {
+    "name": "Trua_'s Birthday",
+    "has_triggered": true
   },
   "11-21": {
     "name": "FireCharged's Birthday",
