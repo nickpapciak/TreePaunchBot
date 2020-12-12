@@ -11,8 +11,8 @@ from config.config import TOKEN
 from OtherFiles.webserver import keep_alive
 from OtherFiles.general_util import load_cogs, load_menu
 import OtherFiles.mobile_indicator
-
-logging.basicConfig(level=logging.INFO)
+4
+# logging.basicConfig(level=logging.INFO)
 load_menu()
 PREFIX = "!!"
 
