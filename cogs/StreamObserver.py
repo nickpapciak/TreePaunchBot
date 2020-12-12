@@ -112,16 +112,12 @@ class StreamObserver(commands.Cog):
             # generates the embed
             stream_embed = await StreamObserver.get_stream_embed(self, streamer)
             if streamer not in self.active_streamers:  # if the streamer is not already in the set
-                print(streamer)
                 if stream_embed:  # if they are streaming
                     await channel.send(embed=stream_embed)
                     # adds the streamer to the set
                     self.active_streamers.add(streamer)
                     # gives roles
-                    print(STREAMER_DICT[streamer])
-                    print(guild, type(guild), guild.name)
                     member = guild.get_member(258013196592349184)
-                    print(member, type(member))
                     await guild.get_member(STREAMER_DICT[streamer]).add_roles(streaming_role)
 
             else:  # if they are already in the set
