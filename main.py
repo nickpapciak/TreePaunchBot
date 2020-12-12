@@ -7,10 +7,11 @@ import discord
 from discord.ext import commands
 
 from config.config import TOKEN
+from etc.webserver import keep_alive
+import etc.mobile_indicator
 
-from OtherFiles.webserver import keep_alive
-from OtherFiles.general_util import load_cogs, load_menu
-import OtherFiles.mobile_indicator
+from util.main_util import load_cogs, load_menu
+
 4
 # logging.basicConfig(level=logging.INFO)
 load_menu()

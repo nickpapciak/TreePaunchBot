@@ -5,7 +5,7 @@ from discord.ext.commands import has_permissions, CheckFailure, CommandNotFound
 from datetime import datetime
 import json
 
-from OtherFiles.todo_util import todo_add, todo_view, todo_delete
+from util.todo_util import todo_add, todo_view, todo_delete
 from main import TreePaunchBot
 
 

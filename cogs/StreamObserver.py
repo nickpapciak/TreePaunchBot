@@ -61,7 +61,6 @@ class StreamObserver(commands.Cog):
                     return False
             except:
                 return False
-                print(response)
             data = response['data'][0]
 
             # gets the url of the thumbnail
@@ -122,10 +121,10 @@ class StreamObserver(commands.Cog):
 
             else:  # if they are already in the set
                 if not stream_embed:  # if they are no longer streaming
+                    # removes roles
                     self.active_streamers.discard(streamer)
                     await guild.get_member(STREAMER_DICT[streamer]).remove_roles(streaming_role)
-                    print("REMOVED THE ROLE")
-                    # removes roles
+                    
 
         # second check so if the bot goes offline then it removes streamer role
         for streamer in STREAMER_DICT.keys():
