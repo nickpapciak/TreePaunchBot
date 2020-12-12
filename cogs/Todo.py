@@ -57,7 +57,7 @@ class Todo(commands.Cog):
       await ctx.send(embed=todo_embed)
       await self.todo_logger()
 
-    @todo.command(name = "view", aliases = ["see", "check", "list"])
+    @todo.command(name = "view", aliases = ["v", "see", "check", "list"])
     async def todo_view_cmd(self, ctx): 
       todo_list = todo_view(str(ctx.author.id)) # generates a list of todo's
 
