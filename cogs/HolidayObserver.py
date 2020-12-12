@@ -5,7 +5,7 @@ import datetime
 import json 
 
 # define constants 
-FILEPATH = "Data/holidays.json"
+FILEPATH = "data/holidays.json"
 MONTH_DICT= {
    1:"January",
    2:"February",

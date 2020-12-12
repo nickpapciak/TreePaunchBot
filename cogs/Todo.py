@@ -9,7 +9,7 @@ from util.todo_util import todo_add, todo_view, todo_delete
 from main import TreePaunchBot
 
 
-FILEPATH = "Data/todos.json"
+FILEPATH = "data/todos.json"
 
 # creates a source class for the menus module
 class TodoMenuSource(menus.ListPageSource):

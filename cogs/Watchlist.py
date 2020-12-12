@@ -4,7 +4,7 @@ from discord.ext import commands, menus
 import json
 from main import TreePaunchBot
 
-FILEPATH = "Data/watchlist.json"
+FILEPATH = "data/watchlist.json"
 COLOR_MAP = [0x90be6d, 0xf9c74f, 0xf8961e, 0xf3722c, 0xf94144]
 PREFIX = TreePaunchBot.prefix 
 
